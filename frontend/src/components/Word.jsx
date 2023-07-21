@@ -1,33 +1,29 @@
 import React, { useEffect, useState } from "react";
 import wordclass from "../class/wordclass";
 
-const Word = ({
-  word,
-  ongoingWordIndex,
-  wordIndex,
-  checkInput,
-  setStat,
-  stat,
-  error,
-  lettersArray,
-}) => {
-  // useEffect(() => {
-  //   let length = [[...word].length];
-  //   let arr = Array(length[0]).fill(0);
-  //   setStat(arr);
-  // }, [word]);
+const Word = ({ error, lettersArray, curIndex, isread }) => {
+  const [err, setErr] = useState("Not");
+
+  useEffect(() => {
+    console.log(error);
+    setErr(error);
+  }, [error]);
 
   return (
-    <div className="flex">
+    <div className="flex ">
       {lettersArray ? (
         lettersArray.map((item, index) => (
           <div
             className={`${
               item.color === 1
-                ? "text-green-400 bg-red-100"
+                ? "text-green-400"
                 : item.color === -1
-                ? "text-red-400 bg-red-100"
+                ? "text-red-400"
                 : "text-white"
+            } ${
+              curIndex === index && isread
+                ? "border-l transition border-10"
+                : ""
             }}`}
           >
             {item.letter}
