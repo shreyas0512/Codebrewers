@@ -14,8 +14,8 @@ socket.on('updateGame', (game) => {
   console.log(game);
 });
 
-function createGame(name) {
-  socket.emit('createGame', name);
+function createGame(name,difficultyLevel,time) {
+  socket.emit('createGame', {name,difficultyLevel,time});
 }
 
 function joinGame(gameId, name) {
@@ -36,6 +36,6 @@ function endGame(gameId, playerId, WPM, accuracy) {
 
 // createGame('John Doe','Hard',30);
 // joinGame('64ba8dc3588bf9a8fce6b7e3', 'Jane Doe');
-startTimer('64ba9ecea89d55157edbdd65','64ba9ed2a89d55157edbdd66');
+startTimer('64badcf2c1f80423fc0fad0f','64badcf5c1f80423fc0fad10');
 // updateWordIndex('64ba8dc3588bf9a8fce6b7e3', '64ba8dd9588bf9a8fce6b7e8', 10);
 // endGame('64ba8dc3588bf9a8fce6b7e3', '64ba8dd9588bf9a8fce6b7e8', 50, 90);
