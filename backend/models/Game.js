@@ -20,7 +20,8 @@ const PlayerSchema = new mongoose.Schema({
         type : Number,
         default : 0
     },
-    Name : {
+    
+    name : {
         type : String
     }
 });
@@ -37,6 +38,14 @@ const GameSchema = new mongoose.Schema({
     },
     startTime : {
         type : Number
+    },
+    difficultyLevel : {
+        type : String,
+        default : "Easy"
+    },
+    time : {
+        type : Number,
+        default : 60
     },
     players : [PlayerSchema]
 });
