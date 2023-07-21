@@ -96,6 +96,7 @@ function SinglePlayerPlayGround() {
               setTotalWords(0);
               setGameOver(false);
               setMessage("Start the Game");
+              setGameStart(false);
             }}
           >
             Restart Game
