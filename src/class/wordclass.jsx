@@ -3,7 +3,8 @@ class wordclass {
   constructor(word, id) {
     this.id = id;
     this.index = 0;
-    this.last = 0;
+    this.complete = false;
+    this.numdone = 0;
     let element = [];
     word.forEach((item) => {
       element.push({

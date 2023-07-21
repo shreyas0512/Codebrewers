@@ -4,7 +4,6 @@ import wordclass from "../class/wordclass";
 const Word = ({
   word,
   ongoingWordIndex,
-  setOngoingWordIndex,
   wordIndex,
   checkInput,
   setStat,
@@ -17,10 +16,6 @@ const Word = ({
   //   let arr = Array(length[0]).fill(0);
   //   setStat(arr);
   // }, [word]);
-
-  useEffect(() => {
-    console.log(word);
-  }, [word]);
 
   return (
     <div className="flex">
@@ -36,7 +31,6 @@ const Word = ({
             }}`}
           >
             {item.letter}
-            {item.color}
           </div>
         ))
       ) : (

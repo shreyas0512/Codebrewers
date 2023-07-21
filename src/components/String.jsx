@@ -9,28 +9,70 @@ const String = ({ words }) => {
   const [error, setError] = useState("");
   //   const lettersArray = words.split("");
   const [wordsAsArray, setWordsAsArray] = useState([]);
+  const [end, setEnd] = useState(false);
 
   const checkInput = (letter) => {
+    console.log(wordsAsArray, wordsAsArray[ongoingWordIndex].word.length);
+
     let lettersArray = wordsAsArray[ongoingWordIndex].word;
-    console.log(letter);
     if (letter == "Shift") return;
     if (letter == " " || letter == "Tab" || letter == "Enter") {
+      if (
+        wordsAsArray[ongoingWordIndex].numdone ==
+        wordsAsArray[ongoingWordIndex].word.length
+      ) {
+        let temp = wordsAsArray;
+        temp[ongoingWordIndex].complete = true;
+        setWordsAsArray(temp);
+      }
       setOngoingWordIndex(ongoingWordIndex + 1);
       setIndex(0);
       return;
     }
-    if (index >= lettersArray.length) {
+    if (index > lettersArray.length) {
       let temp = wordsAsArray;
       temp[ongoingWordIndex].error += letter;
       setWordsAsArray(temp);
-      console.log("HEre", temp);
+    } else if (index == lettersArray.length) {
+      if (letter == "Backspace") {
+        let temp = wordsAsArray;
+        if (temp[ongoingWordIndex].word[index - 1].color == 1)
+          temp[ongoingWordIndex].numdone--;
+        temp[ongoingWordIndex].word[index - 1].color = 0;
+        temp[ongoingWordIndex].index -= 1;
+
+        setWordsAsArray(temp);
+        setIndex(index - 1);
+      }
     } else {
       let neededLetter = lettersArray[index].letter;
       if (letter == "Backspace") {
-        let temp = wordsAsArray;
-        temp[ongoingWordIndex].word[index - 1].color = 0;
-        setWordsAsArray(temp);
-        setIndex(index - 1);
+        if (index == 0) {
+          if (ongoingWordIndex == 0) return;
+          if (wordsAsArray[ongoingWordIndex - 1].complete == true) return;
+          let tempindex = wordsAsArray[ongoingWordIndex - 1].index;
+          tempindex--;
+          let temp = wordsAsArray;
+          temp[ongoingWordIndex - 1].word[tempindex].color = 0;
+          temp[ongoingWordIndex - 1].index -= 1;
+          setIndex(tempindex);
+          setOngoingWordIndex(ongoingWordIndex - 1);
+          setWordsAsArray(temp);
+          return;
+        } else {
+          let temp = wordsAsArray;
+          if (temp[ongoingWordIndex].word[index - 1].color == 1)
+            temp[ongoingWordIndex].numdone--;
+          temp[ongoingWordIndex].word[index - 1].color = 0;
+          temp[ongoingWordIndex].index -= 1;
+          setWordsAsArray(temp);
+          setIndex(index - 1);
+        }
+
+        // if (index == 0) return;
+        // let temp = wordsAsArray;
+        // console.log("PRE", temp);
+
         return;
       }
 
@@ -40,6 +82,7 @@ const String = ({ words }) => {
         setStat(temp1);
         let temp = wordsAsArray;
         temp[ongoingWordIndex].word[index].color = 1;
+        temp[ongoingWordIndex].numdone += 1;
         temp[ongoingWordIndex].index += 1;
         setIndex(index + 1);
         setWordsAsArray(temp);
@@ -48,14 +91,9 @@ const String = ({ words }) => {
         let temp2 = [...stat];
         temp2[index] = -1;
         setStat(temp2);
-        //   let temp = wordsAsArray;
-        //   temp[ongoingWordIndex].color = -1;
-        //   setWordsAsArray(temp);
-        //   temp[ongoingWordIndex].index += 1;
         let temp = wordsAsArray;
         temp[ongoingWordIndex].word[index].color = -1;
-        //   temp[ongoingWordIndex].index += 1;
-        //   console.log(temp);
+        temp[ongoingWordIndex].index += 1;
         setIndex(index + 1);
       }
     }
@@ -73,9 +111,6 @@ const String = ({ words }) => {
     });
     setWordsAsArray(wordsToArray);
   }, [words]);
-  //   useEffect(() => {
-  //     console.log("HERE", wordsAsArray);
-  //   }, [wordsAsArray]);
   return (
     <div
       className="flex gap-4"
@@ -95,6 +130,7 @@ const String = ({ words }) => {
           lettersArray={item.word}
         />
       ))}
+      {end ? <div>End</div> : <></>}
     </div>
   );
 };
