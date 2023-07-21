@@ -3,10 +3,11 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import String from "./components/String";
+import SinglePlayerPlayGround from "./components/SinglePlayerPlayGround";
 
 function App() {
   const [count, setCount] = useState(0);
-  let checkString = ["lorem", "ipsum", "Polt"];
+
   const [correct, setCorrect] = useState([]);
   useEffect(() => {
     let arr = [3];
@@ -18,7 +19,7 @@ function App() {
   return (
     <div className="w-screen">
       <div>
-        <String words={checkString} />
+        <SinglePlayerPlayGround />
       </div>
     </div>
   );
