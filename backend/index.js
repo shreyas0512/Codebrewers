@@ -9,7 +9,7 @@ app.use(cors());
 const expressServer = app.listen(3001);
 const io = sockerio(expressServer);
 const Game = require('./models/Game');
-const tempstring = "The quick brown fox jumps over the lazy dog";
+const sentenceGenerator = require('./SentenceGenerator');
 
 mongoose.connect('mongodb+srv://tallycodebrewers:tallycodebrewers@cluster0.29jo4js.mongodb.net/?retryWrites=true&w=majority',
     { useNewUrlParser: true, useUnifiedTopology: true }
@@ -22,13 +22,16 @@ mongoose.connect('mongodb+srv://tallycodebrewers:tallycodebrewers@cluster0.29jo4
   });
 
 io.on('connect',(socket)=>{
-    socket.on('createGame',async (Name)=>{
+    socket.on('createGame',async (data)=>{
         try{
             let game = new Game();
-            game.words = tempstring.split(' ');
+            game.difficultyLevel = data.difficultyLevel;
+            game.time = data.time;
+            const sentences = await sentenceGenerator(data.difficultyLevel,data.time);
+            game.words = sentences.split(' ');
             let player = {
                 socketId : socket.id,
-                Name : Name,
+                name : data.name,
                 isGameLeader : true  
             }
             game.players.push(player);
@@ -54,7 +57,7 @@ io.on('connect',(socket)=>{
                 socket.join(gameId);
                 let player = {
                     socketId : socket.id,
-                    Name : data.Name,
+                    name : data.name,
                     isGameLeader : false
                 }
                 console.log(player);
@@ -113,7 +116,7 @@ const startGameClock = async (gameId) => {
     let game = await Game.findById(gameId); 
     game.startTime = new Date().getTime();
     game = await game.save();
-    let time = 60;
+    let time = game.time;
     let timerId = setInterval(async()=>{
         if (time >= 0)
         {
