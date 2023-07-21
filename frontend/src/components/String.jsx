@@ -1,18 +1,41 @@
 import React, { useEffect, useState } from "react";
 import Word from "./Word";
 import wordclass from "../class/wordclass";
+import { socket } from "../socket";
 
-const String = ({ words }) => {
+const String = ({
+  words,
+  gameStart,
+  WPM,
+  setWPM,
+  time,
+  totalWords,
+  setTotalWords,
+  correctWords,
+  setCorrectWords,
+}) => {
+  let textlength = 40;
   const [ongoingWordIndex, setOngoingWordIndex] = useState(0);
   const [stat, setStat] = useState([]);
   const [index, setIndex] = useState(0);
-  const [error, setError] = useState("");
   const [wordsAsArray, setWordsAsArray] = useState([]);
-  const [end, setEnd] = useState(false);
+
+  const [start, setStart] = useState(0);
+  const [end, setEnd] = useState(textlength);
+
+  const calculcateWPM = () => {
+    setWPM(Math.round((correctWords / time) * 60));
+    console.log(correctWords, time);
+  };
+
+  // const timer = setInterval(() => {
+  //   time += 1;
+  //   calculcateWPM();
+  // }, 4000);
 
   const checkInput = (letter) => {
+    if (!gameStart) return;
     let lettersArray = wordsAsArray[ongoingWordIndex].word;
-    console.log(index, lettersArray.length, index > lettersArray.length);
     if (letter == "Shift") return;
 
     //managing whitespace
@@ -23,10 +46,20 @@ const String = ({ words }) => {
       ) {
         let temp = wordsAsArray;
         temp[ongoingWordIndex].complete = true;
+        setCorrectWords(correctWords + 1);
+
         setWordsAsArray(temp);
+      }
+      setTotalWords(totalWords + 1);
+      console.log(totalWords);
+      if (totalWords % (textlength - 1) == 0 && totalWords != 0) {
+        setStart(end);
+        setEnd(end + textlength);
+        console.log(start, end);
       }
       setOngoingWordIndex(ongoingWordIndex + 1);
       setIndex(0);
+      calculcateWPM();
       return;
     }
 
@@ -34,7 +67,6 @@ const String = ({ words }) => {
     if (index > lettersArray.length) {
       if (letter == "Backspace") {
         let temp = wordsAsArray;
-        console.log("backend", temp[ongoingWordIndex].error);
         let len = temp[ongoingWordIndex].error.length;
         temp[ongoingWordIndex].error = temp[ongoingWordIndex].error.substr(
           0,
@@ -45,9 +77,11 @@ const String = ({ words }) => {
         return;
       }
       let temp = wordsAsArray;
-      temp[ongoingWordIndex].error += letter;
-      setWordsAsArray(temp);
-      setIndex(index + 1);
+      if (temp[ongoingWordIndex].error.length < 8) {
+        temp[ongoingWordIndex].error += letter;
+        setWordsAsArray(temp);
+        setIndex(index + 1);
+      }
     }
     //word completed
     else if (index == lettersArray.length) {
@@ -82,18 +116,19 @@ const String = ({ words }) => {
           }
           temp[ongoingWordIndex - 1].word[tempindex].color = 0;
           temp[ongoingWordIndex - 1].index -= 1;
+          temp[ongoingWordIndex - 1].error = [];
           setIndex(tempindex);
           setOngoingWordIndex(ongoingWordIndex - 1);
           setWordsAsArray(temp);
           return;
         } else {
           let temp = wordsAsArray;
-          console.log(temp[ongoingWordIndex].word, index);
           if (temp[ongoingWordIndex].word[index - 1].color == 1) {
             temp[ongoingWordIndex].numdone -= 1;
           }
           temp[ongoingWordIndex].word[index - 1].color = 0;
           temp[ongoingWordIndex].index -= 1;
+          temp[ongoingWordIndex].error = [];
           setWordsAsArray(temp);
           setIndex(index - 1);
         }
@@ -128,21 +163,25 @@ const String = ({ words }) => {
       wordsToArray.push(new wordclass(item.split(""), index));
     });
     setWordsAsArray(wordsToArray);
-  }, [words]);
+  }, []);
   return (
     <div
-      className="flex gap-4 p-10 text-xl"
+      className="flex gap-4 justify-center items-center py-10 text-xl w-[1200px] flex-wrap "
       onKeyDown={(e) => checkInput(e.key)}
       tabIndex={0}
     >
-      {wordsAsArray.map((item, indexOfElement) => (
-        <Word
-          error={item.error}
-          lettersArray={item.word}
-          curIndex={index}
-          isread={indexOfElement === ongoingWordIndex}
-        />
-      ))}
+      {wordsAsArray.map((item, indexOfElement) =>
+        indexOfElement >= start && indexOfElement < end ? (
+          <Word
+            error={item.error}
+            lettersArray={item.word}
+            curIndex={index}
+            isread={indexOfElement === ongoingWordIndex}
+          />
+        ) : (
+          <></>
+        )
+      )}
     </div>
   );
 };

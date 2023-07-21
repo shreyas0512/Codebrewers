@@ -2,13 +2,6 @@ import React, { useEffect, useState } from "react";
 import wordclass from "../class/wordclass";
 
 const Word = ({ error, lettersArray, curIndex, isread }) => {
-  const [err, setErr] = useState("Not");
-
-  useEffect(() => {
-    console.log(error);
-    setErr(error);
-  }, [error]);
-
   return (
     <div className="flex ">
       {lettersArray ? (
