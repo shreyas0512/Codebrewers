@@ -1,30 +1,52 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Word from "./Word";
 import wordclass from "../class/wordclass";
+import { socket } from "../socket";
 
-const String = ({
-  words,
-  gameStart,
-  WPM,
-  setWPM,
-  time,
-  totalWords,
-  setTotalWords,
-  correctWords,
-  setCorrectWords,
-}) => {
+const MultiPlayerTypingSpace = () => {
+  const [words, setWords] = useState([]);
+  const [gameStart, setGameStart] = useState(true);
+  const [WPM, setWPM] = useState(0);
+  const [time, setTime] = useState(1);
+  const [totalWords, setTotalWords] = useState(0);
+  const [correctWords, setCorrectWords] = useState(0);
+  const location = useLocation();
+  const [game, setGame] = useState(location.state);
   let textlength = 40;
   const [ongoingWordIndex, setOngoingWordIndex] = useState(0);
   const [stat, setStat] = useState([]);
   const [index, setIndex] = useState(0);
   const [wordsAsArray, setWordsAsArray] = useState([]);
+  const [playerDetails, setPlayerDetails] = useState({});
+  const [message, setMessage] = useState("Start the Game");
+  const [gameOver, setGameOver] = useState(false);
+
+  useEffect(() => {
+    let temp = [];
+    location.state.words.forEach((item, index) => {
+      temp.push(new wordclass(item.split(""), index));
+    });
+    location.state.players.forEach((item) => {
+      if (item.name === localStorage.getItem("username")) {
+        setPlayerDetails(item);
+      }
+    });
+    setWordsAsArray(temp);
+  }, [location]);
 
   const [start, setStart] = useState(0);
   const [end, setEnd] = useState(textlength);
 
   const calculcateWPM = () => {
     setWPM(Math.round((correctWords / time) * 60));
-    console.log(correctWords, time);
+
+    if (playerDetails && playerDetails._id)
+      socket.emit("updateWordIndex", {
+        playerId: playerDetails._id,
+        gameId: game._id,
+        WPM: WPM,
+      });
   };
 
   // const timer = setInterval(() => {
@@ -39,6 +61,7 @@ const String = ({
 
     //managing whitespace
     if (letter == " " || letter == "Tab" || letter == "Enter") {
+      calculcateWPM();
       if (
         wordsAsArray[ongoingWordIndex].numdone ==
         wordsAsArray[ongoingWordIndex].word.length
@@ -50,15 +73,12 @@ const String = ({
         setWordsAsArray(temp);
       }
       setTotalWords(totalWords + 1);
-      console.log(totalWords);
       if (totalWords % (textlength - 1) == 0 && totalWords != 0) {
         setStart(end);
         setEnd(end + textlength);
-        console.log(start, end);
       }
       setOngoingWordIndex(ongoingWordIndex + 1);
       setIndex(0);
-      calculcateWPM();
       return;
     }
 
@@ -156,33 +176,94 @@ const String = ({
     }
   };
 
-  useEffect(() => {
-    let wordsToArray = [];
-    words.map((item, index) => {
-      wordsToArray.push(new wordclass(item.split(""), index));
+  const startGame = () => {
+    socket.emit("startTimer", {
+      playerId: playerDetails._id,
+      gameId: location.state._id,
     });
-    setWordsAsArray(wordsToArray);
+  };
+  useEffect(() => {
+    function onConnect() {
+      console.log("Connect");
+    }
+
+    function onDisconnect() {
+      console.log("Dis");
+    }
+
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.on("timer", (data) => {
+      setMessage(data.msg + " : " + data.countDown);
+      if (data.msg == "Time Remaining") {
+        setTime(30 - data.countDown);
+      }
+    });
+    socket.on("updateGame", (data) => setGame(data));
+    socket.on("GameOver", () => {
+      setGameOver(true);
+    });
+
+    return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+    };
   }, []);
+
   return (
-    <div
-      className="flex gap-4 justify-center items-center py-10 text-xl w-[1200px] flex-wrap "
-      onKeyDown={(e) => checkInput(e.key)}
-      tabIndex={0}
-    >
-      {wordsAsArray.map((item, indexOfElement) =>
-        indexOfElement >= start && indexOfElement < end ? (
-          <Word
-            error={item.error}
-            lettersArray={item.word}
-            curIndex={index}
-            isread={indexOfElement === ongoingWordIndex}
-          />
-        ) : (
-          <></>
-        )
+    <div>
+      <div>GameID : {game._id}</div>
+      {!gameOver ? (
+        <div>
+          <div className="text-center">
+            <div className="text-3xl ">{message}</div>
+            <div className="text-xl">WPM: {WPM}</div>
+          </div>
+          <div
+            className="mt-4 flex gap-4 justify-center items-center py-10 text-xl w-[1200px] flex-wrap "
+            onKeyDown={(e) => checkInput(e.key)}
+            tabIndex={0}
+          >
+            {wordsAsArray.map((item, indexOfElement) =>
+              indexOfElement >= start && indexOfElement < end ? (
+                <Word
+                  error={item.error}
+                  lettersArray={item.word}
+                  curIndex={index}
+                  isread={indexOfElement === ongoingWordIndex}
+                />
+              ) : (
+                <></>
+              )
+            )}
+          </div>
+          <div className="flex mt-4 justify-center">
+            {playerDetails.isGameLeader ? (
+              <button className="" onClick={startGame}>
+                Let the Game Begin
+              </button>
+            ) : (
+              <></>
+            )}
+          </div>
+        </div>
+      ) : (
+        <></>
       )}
+      <div className="text-center mt-4">
+        <div className="text-2xl mb-2">LeaderBoard</div>
+
+        <div className="flex items-center flex-col justify-center">
+          {game.players.map((item) => (
+            <div className="flex gap-4">
+              <div>{item.name}</div>
+              <div>{item.WPM}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
-export default String;
+export default MultiPlayerTypingSpace;
