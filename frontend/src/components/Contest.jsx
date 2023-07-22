@@ -5,7 +5,7 @@ import { socket } from "../socket";
 function Contest() {
   const [time, setTime] = useState(30);
   const [difficulty, setDifficulty] = useState("Easy");
-  const [gameId, setGameId] = useState(0);
+  const [gameId, setGameId] = useState("");
   const navigate = useNavigate();
 
   const createGame = () => {
@@ -50,7 +50,7 @@ function Contest() {
 
   return (
     <div className="flex flex-col items-center w-screen h-screen">
-      <h2 className="text-white font-medium mt-12 text-3xl">Join a Contest</h2>
+      <h2 className="text-white font-medium mt-12 text-2xl">Join a Contest</h2>
       <div className="flex w-screen items-center justify-center mt-8 ">
         <input
           className="bg-[#353535] h-10 px-1 w-1/2 rounded-md shadow-lg outline-none pl-2"
@@ -63,13 +63,13 @@ function Contest() {
           Join
         </button>
       </div>
-      <h3 className="text-5xl mt-12 font-bold">Or</h3>
-      <div className="w-1/2 h-1/2 mt-8 shadow-lg rounded-md bg-[#353535] flex flex-col items-center">
-        <h4 className="text-center mt-2 text-3xl font-medium pt-3">
+      <h3 className="text-3xl mt-12 font-bold">Or</h3>
+      <div className="w-1/2 py-2  mt-8 shadow-lg rounded-md bg-[#353535] flex flex-col items-center">
+        <h4 className="text-center mt-2 text-xl font-medium pt-3">
           Create Your Own Contest
         </h4>
         <select
-          className="bg-[#232323] h-10 px-1 w-1/2 rounded-md shadow-lg text-center outline-none pl-2 mt-8"
+          className="py-2 bg-[#232323] h-10 px-1 w-1/2 rounded-md shadow-lg text-center outline-none pl-2 mt-8"
           onChange={(e) => setDifficulty(e.target.value)}
         >
           <option value="Easy">Easy</option>
@@ -77,18 +77,15 @@ function Contest() {
           <option value="Hard">Hard</option>
         </select>
         <select
-          className="bg-[#232323] h-10 px-1 w-1/2 rounded-md shadow-lg text-center outline-none pl-2 mt-8"
+          className="py-2 bg-[#232323] h-10 px-1 w-1/2 rounded-md shadow-lg text-center outline-none pl-2 mt-8"
           onChange={(e) => setTime(e.target.value)}
         >
           <option value="30">30s</option>
           <option value="60">60s</option>
           <option value="120">120s</option>
         </select>
-        <button
-          className="mt-12 text-2xl font-bold bg-[#232323]"
-          onClick={createGame}
-        >
-          + Create
+        <button className="mt-12  font-bold bg-[#232323]" onClick={createGame}>
+          Create
         </button>
       </div>
     </div>
