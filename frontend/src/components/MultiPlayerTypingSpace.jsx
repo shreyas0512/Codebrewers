@@ -196,7 +196,7 @@ const MultiPlayerTypingSpace = () => {
     socket.on("timer", (data) => {
       setMessage(data.msg + " : " + data.countDown);
       if (data.msg == "Time Remaining") {
-        setTime(30 - data.countDown);
+        setTime(game.time - data.countDown);
       }
     });
     socket.on("updateGame", (data) => setGame(data));
@@ -209,6 +209,20 @@ const MultiPlayerTypingSpace = () => {
       socket.off("disconnect", onDisconnect);
     };
   }, []);
+
+  const sortPlayer = (players) => {
+    let temp = players;
+    for (let i = 0; i < temp.length; i++) {
+      for (let j = 0; j < temp.length - i - 1; j++) {
+        if (temp[j].WPM < temp[j + 1].WPM) {
+          let l = temp[j];
+          temp[j] = temp[j + 1];
+          temp[j + 1] = l;
+        }
+      }
+    }
+    return temp;
+  };
 
   return (
     <div>
@@ -246,22 +260,34 @@ const MultiPlayerTypingSpace = () => {
               <></>
             )}
           </div>
+          <div className="text-center mt-4">
+            <div className="text-2xl mb-2">LeaderBoard</div>
+
+            <div className="flex items-center flex-col justify-center">
+              {game.players.map((item) => (
+                <div className="flex gap-4">
+                  <div>{item.name}</div>
+                  <div>{item.WPM}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       ) : (
-        <></>
-      )}
-      <div className="text-center mt-4">
-        <div className="text-2xl mb-2">LeaderBoard</div>
+        <div className="text-center mt-4">
+          <div className="text-2xl mb-2">LeaderBoard</div>
 
-        <div className="flex items-center flex-col justify-center">
-          {game.players.map((item) => (
-            <div className="flex gap-4">
-              <div>{item.name}</div>
-              <div>{item.WPM}</div>
-            </div>
-          ))}
+          <div className="flex items-center flex-col justify-center">
+            {sortPlayer(game.players).map((item, index) => (
+              <div className="flex gap-4">
+                <div>{index + 1}</div>
+                <div>{item.name}</div>
+                <div>{item.WPM}</div>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

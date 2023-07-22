@@ -80,7 +80,7 @@ function SinglePlayerPlayGround() {
               socket.emit("createSinglePlayerGame", { key: "value" })
             }
           >
-            Click
+            Start
           </button>
         </div>
       ) : (

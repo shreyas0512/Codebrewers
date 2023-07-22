@@ -217,38 +217,53 @@ io.on('connect', (socket) => {
     let player = game.players.id(data.playerId);
     if (player.isGameLeader) {
       let timerId = setInterval(async () => {
-        if (countDown >= 0) {
-          console.log("emitting", data.gameId);
-          io.to(data.gameId).emit('timer', { countDown: countDown, msg: "Starting in" });
-          countDown--;
+        try {
+          if (countDown >= 0) {
+            console.log("emitting", data.gameId);
+            io.to(data.gameId).emit('timer', { countDown: countDown, msg: "Starting in" });
+            countDown--;
+          }
+          else {
+            game.isOpen = false;
+            game = await game.save();
+            io.to(data.gameId).emit('updateGame', game);
+            startGameClock(data.gameId);
+            clearInterval(timerId);
+          }
         }
-        else {
-          game.isOpen = false;
-          game = await game.save();
-          io.to(data.gameId).emit('updateGame', game);
-          startGameClock(data.gameId);
-          clearInterval(timerId);
+        catch (error) {
+          console.log(error);
         }
       }, 1000);
     }
   });
   socket.on('updateWordIndex', async (data) => {
-    console.log(data);
-    let game = await Game.findById(data.gameId);
-    let player = game.players.id(data.playerId);
-    player.WPM = data.WPM;
-    game = await game.save();
-    io.to(data.gameId).emit('updateGame', game);
+    try {
+      let game = await Game.findById(data.gameId);
+      let player = game.players.id(data.playerId);
+      player.WPM = data.WPM;
+      game = await game.save();
+      io.to(data.gameId).emit('updateGame', game);
+    }
+    catch (error) {
+      console.log(error);
+    }
+
   });
 
 
   socket.on('endGame', async (data) => {
-    let game = await Game.findById(data.gameId);
-    let player = game.players.id(data.playerId);
-    player.WPM = data.WPM;
-    player.accuracy = data.accuracy;
-    game = await game.save();
-    io.to(data.gameId).emit('updateGame', game);
+    try {
+      let game = await Game.findById(data.gameId);
+      let player = game.players.id(data.playerId);
+      player.WPM = data.WPM;
+      player.accuracy = data.accuracy;
+      game = await game.save();
+      io.to(data.gameId).emit('updateGame', game);
+    }
+    catch (error) {
+      console.log(error);
+    }
   });
 });
 
@@ -258,16 +273,21 @@ const startGameClock = async (gameId) => {
   game = await game.save();
   let time = game.time;
   let timerId = setInterval(async () => {
-    if (time >= 0) {
-      const formattedTime = formatTime(time);
-      io.to(gameId).emit('timer', { countDown: time, msg: "Time Remaining" });
-      time--;
+    try {
+      if (time >= 0) {
+        const formattedTime = formatTime(time);
+        io.to(gameId).emit('timer', { countDown: time, msg: "Time Remaining" });
+        time--;
+      }
+      else {
+        game.isOver = true;
+        game = await game.save();
+        io.to(gameId).emit('GameOver', game);
+        clearInterval(timerId);
+      }
     }
-    else {
-      game.isOver = true;
-      game = await game.save();
-      io.to(gameId).emit('GameOver', game);
-      clearInterval(timerId);
+    catch (error) {
+      console.log(error);
     }
   }, 1000);
 }
