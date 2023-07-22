@@ -56,7 +56,7 @@ function SinglePlayerPlayGround() {
     return Math.round((correctWords / totalWords) * 100);
   };
   return (
-    <div>
+    <div className="text-center">
       <DisplayMessage message={message} setMessage={setMessage} />
       <div>
         <div className="text-xl mt-2">{WPM} WPM</div>

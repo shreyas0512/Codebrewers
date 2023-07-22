@@ -1,21 +1,31 @@
+import React from "react";
+import Login from "./components/Login";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Mode from "./components/Mode";
+import Contest from "./components/Contest";
+import SinglePlayerPlayGround from "./components/SinglePlayerPlayGround";
+import MultiPlayerTypingSpace from "./components/MultiPlayerTypingSpace";
 
-// import React from 'react'
-// import Login from './components/Login'
-// import {BrowserRouter as Router,Route,Routes } from 'react-router-dom'
-// import Mode from './components/Mode'
-// import Contest from './components/Contest'
-
-// function App() {
-//   return (
-//     <div className='h-screen w-screen flex flex-col items-center'>
-//       <Router>
-//         <Routes>
-//           <Route path='/login' element={<Login/>} />
-//           <Route path='/mode-select' element={<Mode/>} />
-//           <Route path ='mode-select/contest' element={<Contest/>} />
-//         </Routes>
-//       </Router>
-import { useEffect, useState } from "react";
+function App() {
+  return (
+    <div className="h-screen w-screen justify-center flex flex-col items-center">
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/mode-select" element={<Mode />} />
+          <Route path="/mode-select/contest" element={<Contest />} />
+          <Route path="/singlePlayer" element={<SinglePlayerPlayGround />} />
+          <Route
+            path="/multiplayertypingspace"
+            element={<MultiPlayerTypingSpace />}
+          />
+        </Routes>
+      </Router>
+    </div>
+  );
+}
+{
+  /* import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -40,6 +50,7 @@ function App() {
       </div>
     </div>
   )
+} */
 }
 
-export default App
+export default App;
